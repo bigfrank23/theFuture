@@ -1,0 +1,7 @@
+.ql-snow.ql-toolbar button, .ql-snow .ql-toolbar button{
+    background: azure;
+    color: white !important
+}
+.ql-editor{
+    height: 100px !important;
+}

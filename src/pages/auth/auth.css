@@ -1,0 +1,180 @@
+.container{
+    position: relative;
+    width: 800px;
+    height: 600px;
+    margin: 5rem 0;
+    /* background-color: #ff0; */
+}
+.blueBg{
+    position: absolute;
+    top: 40px;
+    width: 100%;
+    height: 420px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 5px 45px rgba(0, 0, 0, 0.15);
+}
+.blueBg .box{
+    position: relative;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.blueBg .box h2{
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+.blueBg .box button{
+    cursor: pointer;
+    padding: 10px 20px;
+    background: #fff;
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+}
+.formBx{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 5px 45px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    transition: 0.5s ease-in-out;
+    overflow: hidden;
+}
+.activeFormBx{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 5px 45px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    transition: 0.5s ease-in-out;
+    overflow: hidden;
+}
+.formBx .form, .activeFormBx .form{
+    position: absolute;
+    left: 0;
+    width: 100%;
+    padding: 50px;
+    transition: 0.5s;
+}
+.formBx .signinForm{
+    transition-delay: .25s;
+}
+.activeFormBx .signinForm{
+    left: -100%;
+    transition-delay: 0s;
+}
+.formBx .signupForm{
+    left: 100%;
+    transition-delay: 0s;
+}
+.activeFormBx .signupForm{
+    left: 0;
+    transition-delay: .25s;
+}
+.formBx .form form, .activeFormBx .form form{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.formBx .form form h3, .activeFormBx .form form h3{
+    font-size: 1.5em;
+    color: #333;
+    /* margin-bottom: 20px; */
+    font-weight: 700;
+}
+.formBx .form form input, .activeFormBx .form form input{
+    width: 100%;
+    /* margin-bottom: 20px; */
+    padding: 10px;
+    outline: none;
+}
+.formBx .form form input[type= 'submit']{
+    background-color: #2196f3;
+    border: none;
+    color: #fff;
+    max-width: 100px;
+    cursor: pointer;
+}
+.activeFormBx .form form input[type= 'submit']{
+    background-color: #f44336;
+    /* background-color: #f43648; */
+    border: none;
+    color: #fff;
+    max-width: 100px;
+    cursor: pointer;
+}
+.react-tel-input .form-control{
+    padding: 0 0 0 48px !important;
+}
+
+/* Tag input */
+.rti--container{
+    padding: 0 !important;
+    border-radius: 1px !important;
+    border: 1px solid #222 !important;
+}
+.rti--input {
+    font-size: revert !important;
+}
+.rti--container:focus-within {
+    border-color: none !important;
+    box-shadow: none !important;
+}
+
+@media(max-width: 991px){
+    .container{
+        max-width: 400px;
+        height: 650px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .container .blueBg{
+        top: 0;
+        height: 100%;
+    }
+    .blueBg .box{
+        position: absolute;
+        width: 100%;
+        height: 150px;
+        bottom: 0;
+    }
+    .box.signin{
+        top: 0;
+    }
+    .formBx{
+        width: 100%;
+        height: 600px;
+        top: 0;
+        box-shadow: none;
+    }
+    .activeFormBx{
+        left: 0;
+        top: 150px;
+        width: 100%;
+        height: 600px;
+        box-shadow: none;
+    }
+}

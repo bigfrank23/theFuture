@@ -1,0 +1,53 @@
+.chatInputClass{
+    /* line-height: 1.42; */
+    height: 100%;
+    width: 100%;
+    outline: none;
+    overflow-y: auto;
+    padding: 12px 15px;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 1px solid #5d8ffc;
+    resize: none;
+    border-radius: 5px;
+    caret-color: #5d8ffc;
+    /* font-size: x-large; */
+}
+
+.inputClass{
+    /* line-height: 1.42; */
+    height: 100px;
+    width: 100%;
+    outline: none;
+    overflow-y: auto;
+    padding: 12px 15px;
+    tab-size: 4;
+    -moz-tab-size: 4;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    border: 5px solid #5d8ffc;
+    resize: none;
+    border-radius: 5px;
+    caret-color: #5d8ffc;
+    font-size: x-large;
+}
+
+.animate-emoji{
+    animation: animateEmoji .25s linear;
+    height: 150px;
+    overflow: auto;
+}
+@keyframes animateEmoji {
+    0%{
+        transform: translateY(-15px);
+        opacity: 0
+    }
+    100%{
+        transform: translateY(0px);
+        opacity: 1
+    }
+}

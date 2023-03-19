@@ -1,0 +1,36 @@
+.links{
+    color: #0071e5;
+    transition: text-decoration .25s ease;
+}
+
+.links:hover, .catLinks:hover{
+    text-decoration:line-through;
+    color: #120686;
+}
+
+.may-know-user-pic{
+    display: flex;
+    margin: auto;
+    width: 40px;
+    border-radius: 50%;
+    padding: 2px;
+    background: linear-gradient(135deg, #673ab7, #03a9f4 50%, transparent 50%);
+    background-size: 250%;
+    /* background-position: 100% 100%; */
+    transition: background .5s;
+}
+
+.may-know-user-pic:hover{
+    background-color: #9c27b0;
+    animation: roll 1s linear infinite;
+}
+
+@keyframes roll{
+    0%{
+    background-position: 15%;
+    }
+    100%{
+        background-position: -100%;
+
+    }
+}
