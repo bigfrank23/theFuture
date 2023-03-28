@@ -118,8 +118,21 @@ const Posts = ({placeholder, className}) => {
           marginTop: "4rem",
         }}
       >
-        <Box component={Link} to='/live_page' className="posts-links" sx={{position: 'absolute',background: '#333', color: '#fff', padding: '1rem', borderTopRightRadius:'50px', borderBottomRightRadius:'50px', cursor: 'pointer'}}>
-        Go Live
+        <Box
+          component={Link}
+          to="/live_page"
+          className="posts-links"
+          sx={{
+            position: "absolute",
+            background: "#333",
+            color: "#fff",
+            padding: "1rem",
+            borderTopRightRadius: "50px",
+            borderBottomRightRadius: "50px",
+            cursor: "pointer",
+          }}
+        >
+          Go Live
         </Box>
         <Box sx={{ display: "flex", gap: ".5rem", justifyContent: "center" }}>
           {catName === "sport" && (
@@ -173,7 +186,11 @@ const Posts = ({placeholder, className}) => {
             <Link
               to={list.to}
               key={list.id}
-              style={catName === list.name.toLowerCase() ? {color: '#f44336'} : { color: "rgb(100 116 139)" }}
+              style={
+                catName === list.name.toLowerCase()
+                  ? { color: "#f44336" }
+                  : { color: "rgb(100 116 139)" }
+              }
               className="catLinks"
             >
               {list.name}
@@ -222,8 +239,7 @@ const Posts = ({placeholder, className}) => {
             }}
           >
             {switchInput ? (
-              <Box sx={{width:'100%'}}>
-
+              <Box sx={{ width: "100%" }}>
                 <EmojiInput className="animate" />
               </Box>
             ) : (
@@ -261,7 +277,7 @@ const Posts = ({placeholder, className}) => {
       <Box component="section" sx={{ padding: "0 24px", marginTop: "5rem" }}>
         <Grid container spacing={2}>
           {items.map((item) => (
-            <Grid key={item.id} item xs={12} sm={6} md={4} lg={3}>
+            <Grid key={item.id} item xs={12} sm={6} md={4} lg={3} sx={{boxShadow: '5px 5px 5px 3px gainsboro'}}>
               <Card
                 sx={{ maxWidth: 345, margin: "auto" }}
                 component={Link}

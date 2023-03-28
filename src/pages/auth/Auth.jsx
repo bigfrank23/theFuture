@@ -1,6 +1,6 @@
-import { Alert, Avatar, Box, Button, CircularProgress, Divider, Typography } from '@mui/material'
+import { Alert, Avatar, Box, Button, CircularProgress, Divider, Typography, keyframes } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import profileImg from '../../images/profile4.jpg'
@@ -10,25 +10,29 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import './auth.css'
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../../redux/userSlice';
+import { loginUser, registerUser } from '../../redux/userSlice';
 import PhoneInput from "react-phone-input-international";
 import "react-phone-input-international/lib/style.css";
 import cogoToast from "cogo-toast";
 import { TagsInput } from "react-tag-input-component";
-// import Input, { getCountries, getCountryCallingCode } from 'react-phone-number-input/input';
-// import en from 'react-phone-number-input/locale/en.json';
-// import 'react-phone-number-input/style.css';
+import AutorenewIcon from '@mui/icons-material/Autorenew';
 
+    
+const spin = keyframes`
+    100% {
+        transform: rotate(360deg);
+    }
+    `;
 
-const Auth = () => {
-  const [activeClass, setActiveClass] = useState(false);
+    const Auth = () => {
+      const [activeClass, setActiveClass] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
-  const [showPicker, setShowPicker] = useState(false);
     
-    const handleShowPassword = () => setShowPassword(!showPassword);
-    const handleShowPassword2 = () => setShowPassword2(!showPassword2);
-
+  const handleShowPassword = () => setShowPassword(!showPassword);
+  const handleShowPassword2 = () => setShowPassword2(!showPassword2);
+  
+  const history = useHistory()
     const dispatch = useDispatch();
     const userStatus = useSelector((state) => state.user.status);
     const userError = useSelector((state) => state.user.error);
@@ -39,8 +43,12 @@ const Auth = () => {
     lastName: Yup.string().required("Last Name is required"),
     userName: Yup.string()
       .required("User Name is required")
-      .min(3, "User Name must be at least 3 characters")
-      .max(20, "User Name must not exceed 20 characters"),
+      .min(3, "Username should be at least 3 characters")
+      .max(16, "Username should be at most 16 characters")
+      .matches(
+        /^[a-zA-Z0-9_]+$/,
+        "Username should not include any special character"
+      ),
     phone: Yup.string()
       // .matches(/^\d{10}$/, "Invalid phone number")
       .required("Required"),
@@ -50,22 +58,47 @@ const Auth = () => {
       .min(1, "At least one interest is required"),
     password: Yup.string()
       .required("Password is required")
-      .min(6, "Password must be at least 6 characters")
-      .max(40, "Password must not exceed 40 characters"),
+      .min(8, "Password should be at least 8 characters")
+      .max(20, "Password should be at most 20 characters")
+      .matches(
+        /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/,
+        "Password should include at least 1 letter, 1 number and 1 special character"
+      ),
     confirmPassword: Yup.string()
       .required("Confirm Password is required")
       .oneOf([Yup.ref("password"), null], "Confirm Password does not match"),
-    profilePhoto: Yup.string()
-      .required("A profile photo is required")
+    profilePhoto: Yup.mixed()
+      .nullable()
       .test(
         "fileSize",
         "File too large, maximum size is 5MB",
-        (value) => value && value.size <= 5000000
+        function (value) {
+          if (!value || !value.size) {
+            return true; // attachment is not required
+          }
+          return value.size <= 5000000;
+        }
       )
       .test(
         "fileType",
-        "Unsupported file format, please upload a JPEG or PNG",
-        (value) => value && /(jpeg|png)/.test(value.type)
+        "Unsupported file format, please upload a JPG, JPEG or PNG",
+        function (value) {
+          if (!value || !value.type) {
+            return true; // attachment is not required
+          }
+          return /(jpeg|jpg|png)/.test(value.type);
+        }
+      ),
+  });
+  const loginValidationSchema = Yup.object().shape({
+    email: Yup.string().required("Email is required").email("Email is invalid"),
+    password: Yup.string()
+      .required("Password is required")
+      .min(8, "Password should be at least 8 characters")
+      .max(20, "Password should be at most 20 characters")
+      .matches(
+        /^(?=.*[0-9])(?=.*[a-zA-Z])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/,
+        "Password should include at least 1 letter, 1 number and 1 special character"
       ),
   });
 
@@ -76,40 +109,47 @@ const Auth = () => {
       userName: "",
       phone: "",
       email: "",
-      interest: "",
+      interests: "",
       password: "",
       confirmPassword: "",
-      profilePhoto: []
+      profilePhoto: null
     },
     validationSchema,
     // validateOnChange: false,
     // validateOnBlur: false,
     onSubmit: async (values) => {
+
       const formData = new FormData();
 
       for (let value in values) {
-        formData.append(value, values[value]);
-      }
-      // formData.append("email", values.email);
-      // formData.append("password", values.password);
-      // formData.append("profilePhoto", values.profilePhoto);
-      // console.log(JSON.stringify(data, null, 2));
-      // console.log(formData);
-      console.log(values);
-
-      dispatch(registerUser(formData));
-
-      // alert(userError)
-
-      // Show success message if registration was successful
-      if (userStatus === "success") {
-        cogoToast.success("Registration successful!");
+        if (value === "profilePhoto") {
+          if (values.profilePhoto !== null) {
+            formData.append(value, values[value]);
+          }
+        } else {
+          formData.append(value, values[value]);
+        }
       }
 
-      // Show error message if there was an error during registration
-      if (userError) {
-        cogoToast.error(userError);
+      dispatch(registerUser({userData: formData, history}));
+    }
+  });
+
+  const loginFormik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    loginValidationSchema,
+    onSubmit: async (values) => {
+
+      const formData = new FormData();
+
+      for (let value in values) {
+          formData.append(value, values[value]);
       }
+
+      dispatch(loginUser({userData: values, history}));
     }
   });
 
@@ -125,6 +165,7 @@ const Auth = () => {
                 minHeight: "100vh",
                 transition: "0.5s",
                 background: "#2196f3",
+                padding: "3rem",
               }
             : {
                 display: "flex",
@@ -169,10 +210,11 @@ const Auth = () => {
             </Box>
           </Box>
           <Box className={!activeClass ? "formBx" : "activeFormBx"}>
+            {/* Sign in */}
             <Box className="form signinForm">
               <Box
                 component="form"
-                onSubmit={formik.handleSubmit}
+                onSubmit={loginFormik.handleSubmit}
                 autoComplete="off"
                 noValidate
               >
@@ -190,11 +232,11 @@ const Auth = () => {
                     type="email"
                     name="email"
                     placeholder="Email"
-                    border={formik.errors.email ? "thin solid red" : null}
-                    onChange={formik.handleChange}
+                    border={loginFormik.errors.email ? "thin solid red" : null}
+                    onChange={loginFormik.handleChange}
                   />
                   <Typography variant="caption" color="red">
-                    {formik.errors.email ? formik.errors.email : null}
+                    {loginFormik.errors.email ? loginFormik.errors.email : null}
                   </Typography>
                 </div>
                 <div>
@@ -203,8 +245,10 @@ const Auth = () => {
                     type={showPassword ? "text" : "password"}
                     name="password"
                     placeholder="Password"
-                    border={formik.errors.password ? "thin solid red" : null}
-                    onChange={formik.handleChange}
+                    border={
+                      loginFormik.errors.password ? "thin solid red" : null
+                    }
+                    onChange={loginFormik.handleChange}
                   />
                   <Box
                     sx={{
@@ -219,10 +263,33 @@ const Auth = () => {
                     {!showPassword ? <Visibility /> : <VisibilityOff />}
                   </Box>
                   <Typography variant="caption" color="red">
-                    {formik.errors.password ? formik.errors.password : null}
+                    {loginFormik.errors.password
+                      ? loginFormik.errors.password
+                      : null}
                   </Typography>
                 </div>
-                <Box component="input" type="submit" value="Login" />
+                {/* <Box component="input" type="submit" value="Login" /> */}
+                <Box>
+                  <Button
+                    variant="contained"
+                    onClick={loginFormik.handleSubmit}
+                    sx={{
+                      // background: "#f44336",
+                      textTransform: "capitalize",
+                      // "&:hover": { background: "#f44336" },
+                    }}
+                    disabled={userStatus === "loading"}
+                    startIcon={
+                      userStatus === "loading" && (
+                        <AutorenewIcon
+                          sx={{ animation: `${spin} 1s infinite ease` }}
+                        />
+                      )
+                    }
+                  >
+                    {userStatus === "loading" ? "" : "Login"}
+                  </Button>
+                </Box>
                 <Link to="/reset_password">
                   <Typography className="forgot" sx={{ color: "#333" }}>
                     Forgot Password?
@@ -244,34 +311,7 @@ const Auth = () => {
                   <Typography component="h3">Sign Up</Typography>
                 </Box>
                 <Divider sx={{ mb: 1 }} />
-                {/* <div>
-                  <AddPhotoAlternateIcon
-                    onClick={() => setShowPicker(!showPicker)}
-                    sx={{ fill: "#5d8ffc", cursor: "pointer" }}
-                  />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    name="profilePhoto"
-                    onChange={(e) =>
-                      formik.setFieldValue(
-                        "profilePhoto",
-                        e.currentTarget.files[0]
-                      )
-                    }
-                    required
-                  />
-                </div> */}
                 <div>
-                  {userStatus === "failed" && (
-                    <Alert color="error" onClose={() => {}}>
-                      Failed!
-                    </Alert>
-                  )}
-                  {userStatus === "success" && (
-                    <Alert onClose={() => {}}>Successful!</Alert>
-                  )}
-                  <Alert onClose={() => {}}>{userError}</Alert>
                   <label htmlFor="profilePhoto">Profile Photo</label>
                   <input
                     id="profilePhoto"
@@ -287,7 +327,9 @@ const Auth = () => {
                     onBlur={formik.handleBlur}
                   />
                   {formik.touched.profilePhoto && formik.errors.profilePhoto ? (
-                    <div>{formik.errors.profilePhoto}</div>
+                    <Typography variant="caption" color="red">
+                      {formik.errors.profilePhoto}
+                    </Typography>
                   ) : null}
                 </div>
                 <div>
@@ -398,17 +440,17 @@ const Auth = () => {
 
                 <div>
                   <TagsInput
-                    // value={selected}
-                    // onChange={setSelected}
-                    value={formik.values.interest}
-                    name="interest"
-                    onChange={(newValues) => formik.setFieldValue('interests', newValues)}
+                    value={formik.values.interests}
+                    name="interests"
+                    onChange={(newValues) =>
+                      formik.setFieldValue("interests", newValues)
+                    }
                     onBlur={formik.handleBlur}
                     placeHolder="Add one or more interests"
                   />
-                  {formik.touched.interest && formik.errors.interest ? (
+                  {formik.touched.interests && formik.errors.interests ? (
                     <Typography variant="caption" color="red">
-                      {formik.errors.interest}
+                      {formik.errors.interests}
                     </Typography>
                   ) : null}
                 </div>
@@ -488,8 +530,16 @@ const Auth = () => {
                       textTransform: "capitalize",
                       "&:hover": { background: "#f44336" },
                     }}
+                    disabled={userStatus === "loading"}
+                    startIcon={
+                      userStatus === "loading" && (
+                        <AutorenewIcon
+                          sx={{ animation: `${spin} 1s infinite ease` }}
+                        />
+                      )
+                    }
                   >
-                    {userStatus === "loading" ? "processing..." : "Register"}
+                    {userStatus === "loading" ? "" : "Register"}
                   </Button>
                 </Box>
                 <Link to="/reset_password">

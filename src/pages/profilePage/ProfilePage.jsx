@@ -17,6 +17,7 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import BookmarkAddIcon from "@mui/icons-material/BookmarkAdd";
 import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
+import InterestsIcon from '@mui/icons-material/Interests';
 import BookmarksIcon from "@mui/icons-material/Bookmarks";
 import profileImg from '../../images/profile4.jpg'
 import coverImg from '../../images/sea.jpg'
@@ -24,9 +25,12 @@ import { items, photos } from '../../data/profilePageData';
 import { red } from '@mui/material/colors';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import {useDispatch, useSelector} from 'react-redux'
+
 
 import {PhotoAlbum} from "react-photo-album";
 import { Link } from 'react-router-dom';
+import { getUser } from '../../redux/userSlice';
 
 const truncateTitle = {
   whiteSpace: 'nowrap ', /* prevent the text from wrapping to the next line */
@@ -43,12 +47,19 @@ const truncateDesc = {
   textOverflow: 'ellipsis'
 }
 
+const userId = JSON.parse(localStorage.getItem("profile"))?.result?._id;
+
 const ProfilePage = () => {
   const [index, setIndex] = useState(-1);
+  const [user, setUser] = useState('')
+
+  const dispatch = useDispatch()
 
   useEffect(()=>{
     window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
-  },[])
+
+    dispatch(getUser({userId, setUser}))
+  },[dispatch])
 
   return (
     <>
@@ -111,23 +122,31 @@ const ProfilePage = () => {
                 sx={{ fontWeight: 700, marginTop: "1rem" }}
               >
                 {" "}
-                Franklin Ezeyim
+                {user?.firstName}
+                &nbsp; {user?.lastName}
               </Typography>
               <VerifiedIcon sx={{ fontSize: "1rem" }} />
             </Box>
             <Typography
+              component="span"
+              variant="caption"
+              sx={{ color: "hsla(0,0%,100%,.8)", my: 2 }}
+            >
+              @{user.userName}
+            </Typography>
+            <Typography
               component="h3"
               variant="h6"
               sx={{ color: "hsla(0,0%,100%,.8)", my: 2 }}
-            >
-              Software Engineer
+              >
+              {user.jobTitle}
             </Typography>
             <Typography
               component="p"
               variant="subtitle2"
               sx={{ color: "hsla(0,0%,100%,.8)", my: 2 }}
-            >
-              A little info about me
+              >
+              {user.bio}
             </Typography>
             <Box
               sx={{ display: "flex", gap: "1.5rem", justifyContent: "center" }}
@@ -218,6 +237,7 @@ const ProfilePage = () => {
                 </Typography>
               </Box>
             </Box>
+            <Box></Box>
             <Box
               sx={{ display: "flex", gap: "1rem", justifyContent: "center" }}
             >
@@ -236,6 +256,15 @@ const ProfilePage = () => {
                 }}
               >
                 <MailOutlinedIcon sx={{ color: "#fff" }} />
+              </IconButton>
+              <IconButton
+                size="small"
+                sx={{
+                  background: "#e91e63",
+                  "&:hover": { background: "#b94069" },
+                }}
+              >
+                <BookmarksIcon sx={{ color: "#fff" }} />
               </IconButton>
             </Box>
           </Box>

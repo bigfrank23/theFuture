@@ -11,6 +11,8 @@ import Auth from "./pages/auth/Auth";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Gallery from "./pages/gallery/Gallery";
 import EditAccount from "./pages/settings/EditAccount";
+import ScrollIndicator from "./components/scrollIndicator/ScrollIndicator";
+import WelcomePage from "./pages/welcomePage/WelcomePage";
 
 
 function App() {
@@ -18,6 +20,7 @@ function App() {
     <div className="App">
       <Router>
       <NavMenu />
+      <ScrollIndicator />
         <Switch>
           <Route exact path='/' component={Home} />
           <Route path={['/posts', '/general','/sport','/music', '/business','/travels', '/movies']} component={Posts} />
@@ -29,6 +32,7 @@ function App() {
           <Route path='/auth' component={Auth} />
           <Route path='/reset_password' component={ForgotPassword} />
           <Route path='/edit_account' component={EditAccount} />
+          <Route path='/welcome_page' component={WelcomePage} />
         </Switch>
       <Footer/>
       </Router>

@@ -60,7 +60,8 @@
     top: 0;
     left: 50%;
     width: 50%;
-    height: 100%;
+    /* height: 100%; */
+    height: 120%;
     background: #fff;
     display: flex;
     justify-content: center;
@@ -146,6 +147,7 @@
 @media(max-width: 991px){
     .container{
         max-width: 400px;
+        min-height: 700px;
         height: 650px;
         display: flex;
         justify-content: center;
@@ -153,7 +155,7 @@
     }
     .container .blueBg{
         top: 0;
-        height: 100%;
+        height: 93.5%;
     }
     .blueBg .box{
         position: absolute;
@@ -166,7 +168,7 @@
     }
     .formBx{
         width: 100%;
-        height: 600px;
+        height: 470px;
         top: 0;
         box-shadow: none;
     }
@@ -174,7 +176,7 @@
         left: 0;
         top: 150px;
         width: 100%;
-        height: 600px;
+        height: 93.5%;
         box-shadow: none;
     }
 }
