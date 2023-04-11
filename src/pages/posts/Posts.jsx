@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import { Box, Typography, keyframes, Grid, Card, CardActionArea, CardMedia, CardContent, Avatar, CardHeader, Stack, Pagination, CardActions } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import { Box, Typography, keyframes, Grid, Card, CardActionArea, CardMedia, CardContent, Avatar, CardHeader, Stack, Pagination, CardActions, Skeleton } from "@mui/material";
 import CategoryIcon from "@mui/icons-material/Category";
 import { v4 as uuidv4 } from "uuid";
 import RichTextInput from "../../components/richTextInput/RichTextInput";
-import UserImg from "../../images/user2.jpg";
+import UserImg from "../../images/user.png";
 import { Link, useHistory, useLocation } from "react-router-dom";
 import EmojiInput from "../../components/richTextInput/EmojiInput";
 import SwitchLeftIcon from '@mui/icons-material/SwitchLeft';
@@ -20,8 +20,12 @@ import BusinessIcon from "@mui/icons-material/Business";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
 import './posts.css'
 import dummyImg from '../../images/unavail.jpg'
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from "../../redux/userSlice";
 // import authorImg from '../../images/profile4.jpg'
 import { red } from "@mui/material/colors";
+import { createPost, getPosts } from "../../redux/postsSlice";
+import moment from 'moment'
 
 const spin = keyframes`
     from {
@@ -96,16 +100,62 @@ const categoryLinkList = [
 
 const items = [1, 2, 3, 4, 5, 6, 7, 8]
 
+const userId = JSON.parse(localStorage.getItem("profile"))?.result?._id;
 
-const Posts = ({placeholder, className}) => {
-  const [switchInput, setSwitchInput] = useState(false)
-  
-  
+const Posts = () => {
+  const [switchInput, setSwitchInput] = useState(false);
+  const [content, setContent] = useState("");
+  const [user, setUser] = useState("");
+  const [post, setPost] = useState("");
+
+  const postStatus = useSelector((state) => state.posts.status);
+
+  const searchParams = new URLSearchParams(window.location.search);
+  const initialPage = parseInt(searchParams.get("page")) || 1;
+  const [currentPage, setCurrentPage] = useState(initialPage);
+
+  const [posts, setPosts] = useState([]);
+  // const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [loadMore, setLoadMore] = useState(false);
+
+  const dispatch = useDispatch();
+
+  // console.log(content)
   const location = useLocation();
   const catName = location.pathname.split("/")[1];
   // console.log(location)
 
+  const history = useHistory()
 
+  // const user = useSelector((state) => state.user.currentUser);
+
+  const handleChange = (value) => {
+    setContent(value);
+  };
+
+  const handleSubmit = () => {
+    console.log(content);
+    dispatch(createPost({content, username: user.userName, userImg: user.profilePhoto, setContent}))
+  };
+
+  // const handlePageChange = () => {
+  //   setCurrentPage(currentPage + 1);
+  //   setLoadMore(true);
+  // }
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page);
+    setLoadMore(true);
+    history.push(`?page=${page}`);
+  };
+
+
+  useEffect(() => {
+    dispatch(getUser({ userId, setUser }));
+    dispatch(getPosts({setLoadMore, setTotalPages, currentPage, setPosts, posts}))
+  }, [dispatch, currentPage]);
+  
   return (
     <>
       <Box
@@ -207,14 +257,20 @@ const Posts = ({placeholder, className}) => {
             justifyContent: "center",
           }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              marginRight: "10px",
+            }}
+          >
             <Box
               component="img"
-              src={UserImg}
+              src={user.profilePhoto || UserImg}
               alt="user"
               sx={{
-                width: "50px",
-                height: "50px",
+                width: "40px",
+                height: "40px",
                 borderRadius: "50%",
                 alignSelf: "center",
               }}
@@ -238,14 +294,20 @@ const Posts = ({placeholder, className}) => {
               margin: { sm: "auto", md: 0, lg: 0 },
             }}
           >
-            {switchInput ? (
+            {!switchInput ? (
               <Box sx={{ width: "100%" }}>
-                <EmojiInput className="animate" />
+                <EmojiInput className="animate" user={user} />
               </Box>
             ) : (
               <RichTextInput
                 className="animate"
                 placeholder="What's on your mind?"
+                handleChange={handleChange}
+                content={content}
+                setContent={setContent}
+                handleSubmit={handleSubmit}
+                post={post}
+                setPost={setPost}
               />
             )}
           </Box>
@@ -264,90 +326,143 @@ const Posts = ({placeholder, className}) => {
       >
         <Stack spacing={2}>
           <Pagination
-            count={10}
             showFirstButton
             showLastButton
             color="primary"
             variant="outlined"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
           />
         </Stack>
       </Box>
 
       {/* Category Posts */}
       <Box component="section" sx={{ padding: "0 24px", marginTop: "5rem" }}>
-        <Grid container spacing={2}>
-          {items.map((item) => (
-            <Grid key={item.id} item xs={12} sm={6} md={4} lg={3} sx={{boxShadow: '5px 5px 5px 3px gainsboro'}}>
-              <Card
-                sx={{ maxWidth: 345, margin: "auto" }}
-                component={Link}
-                to="/post"
-                className="posts-links"
-              >
-                <CardActionArea>
-                  <CardMedia
-                    component="img"
-                    height="140"
-                    image={dummyImg}
-                    alt="green iguana"
-                  />
-                  <CardContent>
-                    <Typography
+        {/* <Grid container rowSpacing={4} columnSpacing={{ xs: 6, sm: 4, md: 3 }}> */}
+        <Grid container spacing={4}>
+          {posts.map((post) => (
+            <>
+              {postStatus === "loading" ? (
+                <Stack spacing={1}>
+                  {/* For variant="text", adjust the height via font-size */}
+                  <Skeleton variant="text" sx={{ fontSize: "1rem" }} />
+                  {/* For other variants, adjust the size with `width` and `height` */}
+                  <Skeleton variant="circular" width={40} height={40} />
+                  <Skeleton variant="rectangular" width={210} height={60} />
+                  <Skeleton variant="rounded" width={210} height={60} />
+                </Stack>
+              ) : (
+                <Grid
+                  key={post._id}
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  sx={{ boxShadow: "5px 5px 5px 3px gainsboro" }}
+                  component={Link}
+                    to={"/post/" + post._id}
+                    className="posts-links"
+                >
+                  <Card
+                    sx={
+                      post.photo === null || post.video === null
+                        ? { maxWidth: 345, margin: "auto" }
+                        : {
+                            maxWidth: 345,
+                            margin: "auto",
+                            display: "flex",
+                            flexDirection: "column-reverse",
+                            boxShadow: "none !important",
+                          }
+                    }
+                  >
+                    <CardActionArea>
+                      {post.photo && (
+                        <CardMedia
+                          component="img"
+                          height="140"
+                          image={post.photo}
+                          alt="green iguana"
+                        />
+                      )}
+                      {post.video && (
+                        <CardMedia
+                          component="video"
+                          controls
+                          autoPlay={false}
+                          height="140"
+                          src={post.video}
+                          alt="green iguana"
+                        />
+                      )}
+                      <CardContent>
+                        {/* <Typography
                       gutterBottom
                       variant="h5"
                       component="div"
                       sx={truncateTitle}
                     >
                       Lizard
-                    </Typography>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={truncateDesc}
+                    </Typography> */}
+                        {/<\/?[a-z][\s\S]*>/i.test(post.content) ? (
+                          <div
+                            className="post-content"
+                            dangerouslySetInnerHTML={{ __html: post.content }}
+                          ></div>
+                        ) : (
+                          <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            sx={truncateDesc}
+                          >
+                            {post.content}
+                          </Typography>
+                        )}
+                      </CardContent>
+                    </CardActionArea>
+                    <Box
+                      sx={{ display: "flex", justifyContent: "space-between" }}
                     >
-                      Lizards are a widespread group of squamate reptiles, with
-                      over 6,000 species, ranging across all continents except
-                      Antarctica
-                    </Typography>
-                  </CardContent>
-                </CardActionArea>
-                <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                  <CardHeader
-                    avatar={
-                      <Avatar
-                        src={item.profileImg}
-                        sx={{ bgcolor: red[500] }}
-                        aria-label={item.title}
+                      <CardHeader
+                        avatar={
+                          <Avatar
+                            src={post.userImg || ""}
+                            sx={{ bgcolor: red[500] }}
+                            aria-label={post.title || ""}
+                          >
+                            {post.username.charAt(0)}
+                          </Avatar>
+                        }
+                        title={post.username}
+                        subheader={moment(post?.createdAt).fromNow()}
+                      />
+                      <CardActions
+                        sx={{ fontSize: ".8rem", color: "rgba(0, 0, 0, 0.6)" }}
                       >
-                        R
-                      </Avatar>
-                    }
-                    title="Shrimp and Chorizo Paella"
-                    subheader="September 14, 2016"
-                  />
-                  <CardActions
-                    sx={{ fontSize: ".8rem", color: "rgba(0, 0, 0, 0.6)" }}
-                  >
-                    <Box>
-                      <ThumbUpIcon sx={{ fontSize: ".875rem" }} />
-                      <span>4k</span>
+                        <Box>
+                          <ThumbUpIcon sx={{ fontSize: ".875rem" }} />
+                          <span>4k</span>
+                        </Box>
+                        <Box>
+                          <ModeCommentIcon sx={{ fontSize: ".875rem" }} />
+                          <span>4k</span>
+                        </Box>
+                        <Box>
+                          <RepeatIcon sx={{ fontSize: ".875rem" }} />
+                          <span>4k</span>
+                        </Box>
+                        <Box>
+                          <VisibilityIcon sx={{ fontSize: ".875rem" }} />
+                          <span>4k</span>
+                        </Box>
+                      </CardActions>
                     </Box>
-                    <Box>
-                      <ModeCommentIcon sx={{ fontSize: ".875rem" }} />
-                      <span>4k</span>
-                    </Box>
-                    <Box>
-                      <RepeatIcon sx={{ fontSize: ".875rem" }} />
-                      <span>4k</span>
-                    </Box>
-                    <Box>
-                      <VisibilityIcon sx={{ fontSize: ".875rem" }} />
-                      <span>4k</span>
-                    </Box>
-                  </CardActions>
-                </Box>
-              </Card>
-            </Grid>
+                  </Card>
+                </Grid>
+              )}
+            </>
           ))}
         </Grid>
       </Box>
@@ -364,11 +479,13 @@ const Posts = ({placeholder, className}) => {
       >
         <Stack spacing={2}>
           <Pagination
-            count={10}
             showFirstButton
             showLastButton
             color="primary"
             variant="outlined"
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
           />
         </Stack>
       </Box>

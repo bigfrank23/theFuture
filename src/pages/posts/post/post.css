@@ -1,0 +1,12 @@
+.post-user-img{
+    padding: 3px;
+    background: linear-gradient(135deg, #673ab7, #03a9f4 50%, transparent 50%);
+    background-size: 250%;
+    /* background-position: 100% 100%; */
+    transition: background .5s;
+}
+
+.post-user-img:hover{
+    background-color: #9c27b0;
+    animation: roll 1s linear infinite;
+}

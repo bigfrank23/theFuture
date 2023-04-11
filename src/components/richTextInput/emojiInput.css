@@ -40,6 +40,7 @@
     animation: animateEmoji .25s linear;
     height: 150px;
     overflow: auto;
+    margin-top: 1rem;
 }
 @keyframes animateEmoji {
     0%{

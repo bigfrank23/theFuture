@@ -19,13 +19,15 @@ import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
 import BookmarkRemoveIcon from "@mui/icons-material/BookmarkRemove";
 import InterestsIcon from '@mui/icons-material/Interests';
 import BookmarksIcon from "@mui/icons-material/Bookmarks";
-import profileImg from '../../images/profile4.jpg'
+import profileImg from '../../images/user.png'
 import coverImg from '../../images/sea.jpg'
 import { items, photos } from '../../data/profilePageData';
 import { red } from '@mui/material/colors';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import {useDispatch, useSelector} from 'react-redux'
+import moment from 'moment'
+import Geocode from 'react-geocode'
 
 
 import {PhotoAlbum} from "react-photo-album";
@@ -52,6 +54,9 @@ const userId = JSON.parse(localStorage.getItem("profile"))?.result?._id;
 const ProfilePage = () => {
   const [index, setIndex] = useState(-1);
   const [user, setUser] = useState('')
+  const [latitude, setLatitude] = useState('')
+  const [longitude, setLongitude] = useState('')
+  const [address, setAddress] = useState('')
 
   const dispatch = useDispatch()
 
@@ -59,11 +64,51 @@ const ProfilePage = () => {
     window.scrollTo({top: 0, left: 0, behavior: 'smooth'})
 
     dispatch(getUser({userId, setUser}))
+
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition((position)=> {
+        setLatitude(position.coords.latitude)
+        setLongitude(position.coords.longitude)
+      }, (err)=> {console.log(err)})
+    }else{
+      console.log('Geolocation is not supported by this browser')
+    }
   },[dispatch])
+
+  useEffect(()=>{
+    if(latitude && longitude){
+      Geocode.fromLatLng(latitude, longitude).then(
+        (response)=> {
+          const address = response.results[0].formatted_address;
+          setAddress(address)
+        }, (error)=> {
+          console.error(error)
+        }
+      )
+    }
+  },[latitude, longitude])
+  
+  // console.log(
+  //   navigator.geolocation.getCurrentPosition((position) => {
+  //     setLatitude(position.coords.latitude);
+  //     setLongitude(position.coords.longitude);
+  //   })
+  // );
+  console.log(longitude)
+  console.log(latitude)
+  console.log(address)
+
+  const date = moment(user.dob)
+  const formattedDate = date.format('MMM D')
 
   return (
     <>
-      <Box sx={{ padding: "0 24px", marginTop: "4rem" }}>
+      <Box
+        sx={{
+          padding: { xs: "0px", sm: "0 24px", md: "0 24px", lg: "0 24px" },
+          marginTop: "4rem",
+        }}
+      >
         <Box
           component="section"
           sx={{
@@ -78,7 +123,12 @@ const ProfilePage = () => {
         >
           <Box
             sx={{
-              width: "40%",
+              width: {
+                xs: "calc(100% - 3rem)",
+                sm: "calc(100% - 12rem)",
+                md: "45%",
+                lg: "40%",
+              },
               padding: "3rem",
               textAlign: "center",
               color: "#fff",
@@ -104,7 +154,7 @@ const ProfilePage = () => {
             </Box>
             <Box
               component="img"
-              src={profileImg}
+              src={user?.profilePhoto || profileImg}
               sx={{
                 width: "123px",
                 height: "123px",
@@ -112,6 +162,7 @@ const ProfilePage = () => {
                 boxShadow: "0 10px 25px 0 rgb(0 0 0 / 30%)",
                 border: "1px solid #fff",
               }}
+              loading="lazy"
             />
             <Box
               sx={{ display: "flex", gap: "1rem", justifyContent: "center" }}
@@ -138,14 +189,14 @@ const ProfilePage = () => {
               component="h3"
               variant="h6"
               sx={{ color: "hsla(0,0%,100%,.8)", my: 2 }}
-              >
+            >
               {user.jobTitle}
             </Typography>
             <Typography
               component="p"
               variant="subtitle2"
               sx={{ color: "hsla(0,0%,100%,.8)", my: 2 }}
-              >
+            >
               {user.bio}
             </Typography>
             <Box
@@ -197,7 +248,7 @@ const ProfilePage = () => {
                   sx={{ fontSize: "1rem", alignSelf: "center" }}
                 />
                 <Typography component="span" variant="caption">
-                  Aug 6
+                  {formattedDate}
                 </Typography>
               </Box>
               <Box
@@ -237,7 +288,25 @@ const ProfilePage = () => {
                 </Typography>
               </Box>
             </Box>
-            <Box></Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                color: "#ccc",
+                marginBottom: "1rem",
+              }}
+            >
+              <InterestsIcon sx={{ fontSize: "1rem", alignSelf: "center" }} />
+              {/* {user?.interest?.map((v,i)=> (
+                ))} */}
+              <Typography
+                component="span"
+                variant="caption"
+                sx={{ textAlign: "center" }}
+              >
+                {user?.interests?.join(", ")}
+              </Typography>
+            </Box>
             <Box
               sx={{ display: "flex", gap: "1rem", justifyContent: "center" }}
             >

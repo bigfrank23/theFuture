@@ -36,7 +36,8 @@ import HomeIcon from "@mui/icons-material/Home";
 import { Link } from 'react-router-dom';
 import userImg from '../../images/user3.jpg'
 import ChatInput from '../richTextInput/ChatInput';
-import axios from 'axios'
+import { useDispatch, useSelector } from "react-redux";
+import { getUser } from '../../redux/userSlice';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -228,6 +229,8 @@ export default function NavMenu(props) {
    const [query, setQuery] = React.useState('')
    const [results, setResults] = React.useState([])
 
+   const dispatch = useDispatch();
+
    const highlightMatch = (text, match) => {
     const regex = new RegExp(`(${match})`, 'gi')
     return text.split(regex).map((part, i)=> (
@@ -307,6 +310,12 @@ export default function NavMenu(props) {
     handleDrawerClose()
     localStorage.setItem("navColor", toggleNavColor);
   };
+
+  const userId = JSON.parse(localStorage.getItem("profile"))?.result?._id;
+  const [user, setUser] = React.useState("");
+  React.useEffect(()=> {
+    dispatch(getUser({ userId, setUser }));
+  }, [])
  
 
   // For appearance menu setting
@@ -372,7 +381,7 @@ export default function NavMenu(props) {
           fontWeight={700}
           textAlign="center"
         >
-          Franklin
+          {user?.userName}
         </Typography>
         <Box
           width="8px"
@@ -928,10 +937,11 @@ export default function NavMenu(props) {
               component={Link}
               to="/profile"
             >
-              <AccountCircle />
+              {!user?.profilePhoto ? <AccountCircle /> :
+              <Avatar src={user?.profilePhoto} sx={{height: '25px', width: '25px'}} /> || <AccountCircle />}
             </IconButton>
             <Typography variant="caption" alignSelf="center">
-              Franklin
+              {user?.userName}
             </Typography>
             <Box
               width="8px"

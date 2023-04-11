@@ -22,3 +22,32 @@
 /* .catLinks{
     color: red !important;
 } */
+
+/* Properly center the grid and give it a gap */
+.css-480o17-MuiGrid-root{
+    justify-content: center;
+    gap: 2.2rem;
+}
+
+/* Remove default padding left on the card */
+.css-480o17-MuiGrid-root>.MuiGrid-item {
+    padding-left: 0 !important;
+}
+
+/* Ellipsis for the posts username*/
+.css-et1ao3-MuiTypography-root{
+    white-space: nowrap; /* prevent the text from wrapping to the next line */
+    overflow: hidden; /* hide any overflowing text */
+    text-overflow: ellipsis; /* display an ellipsis (...) to indicate truncated text */
+    width: 100px; /* set the width of the element to the desired value */
+    color: darkgoldenrod;
+}
+
+.post-content{
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* specify the number of lines to show */
+    -webkit-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipse;
+}

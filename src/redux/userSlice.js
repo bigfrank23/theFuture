@@ -81,7 +81,7 @@ export const updateUser = createAsyncThunk("user/update",   async ({userData, hi
 export const getUser = createAsyncThunk("user/get",   async ({userId, setUser}) => {
     try {
       const res = await myApi.get("/auth/" + userId);
-      console.log(res);
+      // console.log(res);
       setUser(res.data)
 
       // cogoToast.success( res.data.message, {

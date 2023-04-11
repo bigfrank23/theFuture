@@ -2,6 +2,15 @@
     background: azure;
     color: white !important
 }
-.ql-editor{
+/* .ql-editor{
     height: 100px !important;
+} */
+.ql-snow .ql-editor img {
+    max-width: 200px;
+}
+.post-content img {
+    max-width: 200px;
+}
+.quill{
+    max-width: 500px;
 }

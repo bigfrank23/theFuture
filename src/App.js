@@ -24,7 +24,7 @@ function App() {
         <Switch>
           <Route exact path='/' component={Home} />
           <Route path={['/posts', '/general','/sport','/music', '/business','/travels', '/movies']} component={Posts} />
-          <Route path='/post' component={Post} />
+          <Route path='/post/:id' component={Post} />
           <Route path='/profile' component={ProfilePage} />
           <Route path='/profile_update' component={ProfilePageUpdate} />
           <Route path='/live_page' component={LivePage} />
